@@ -53,7 +53,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  Future<Album> futureAlbum;
+  Future<List<Article>> futureArticles;
 
   void _incrementCounter() {
     setState(() {
@@ -69,8 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    futureAlbum = fetchAlbum(1);
-
+    futureArticles = fetchArticles();
   }
 
   @override
@@ -87,70 +86,68 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+      body: FutureBuilder<List<Article>>(
+          future: futureArticles,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              //return Text(snapshot.data[0].title);
+              List<Article> arts = snapshot.data;
 
-            FutureBuilder<Album>(
-              future: futureAlbum,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Text(snapshot.data.title);
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                }
+              return ListView.builder(
+                  itemCount: arts.length,
+                  itemBuilder: (context, index) {
+                    Article art = arts[index];
 
-                // By default, show a loading spinner.
-                return CircularProgressIndicator();
-              },
-            ),
+                    return Container(
+                      height: 60,
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(art.urlToImage),
+                        ),
+                        trailing: Text(art.author),
+                        title: new Text(art.title),
+                        onTap: () {
+                          //Navigator.push(context, new MaterialPageRoute(builder: (context) => new Home()));
+                        },
+                      ),
+                    );
+                  });
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
 
-
-            Text(
-              'You have pushed the button this many times:',
-            ),
-
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+            // By default, show a loading spinner.
+            return CircularProgressIndicator();
+          },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      
     );
   }
 }
 
-Future<Album> fetchAlbum(var albumNum) async {
-  final response =
-      await http.get('https://jsonplaceholder.typicode.com/albums/'+albumNum.toString());
+Future<List<Article>> fetchArticles() async {
+  final response = await http.get(
+      'https://newsapi.org/v2/everything?q=apples&apiKey=72d027b1dc974964b9af07784ff0636d');
 
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
-    return Album.fromJson(json.decode(response.body));
+
+    //print(json.decode(response.body)['articles'][1]);
+
+    final arts = <Article>[];
+
+    final jResponse = json.decode(response.body);
+    final numArticles =
+        jResponse['totalResults'] < 20 ? jResponse['totalResults'] : 20;
+
+    for (var i=0; i<numArticles; i++) {
+          arts.add(Article.fromJson(jResponse['articles'][i]));
+    }
+
+    //print(numArticles);
+
+    return arts;
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
@@ -158,18 +155,19 @@ Future<Album> fetchAlbum(var albumNum) async {
   }
 }
 
-class Album {
-  final int userId;
-  final int id;
+class Article {
   final String title;
+  final String author;
+  final String content;
+  final String urlToImage;
 
-  Album({this.userId, this.id, this.title});
+  Article({this.title, this.author, this.content, this.urlToImage});
 
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return Album(
-      userId: json['userId'],
-      id: json['id'],
-      title: json['title'],
-    );
+  factory Article.fromJson(Map<String, dynamic> json) {
+    return Article(
+        title: json['title'],
+        author: json['author'],
+        content: json['content'],
+        urlToImage: json['urlToImage']);
   }
 }
