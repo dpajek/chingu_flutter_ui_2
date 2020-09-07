@@ -193,6 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 Future<List<Article>> fetchArticles(String searchTerm) async {
   // if no search term, show headlines!
+
   final response = searchTerm == ''
       ? await http.get(
           'https://newsapi.org/v2/top-headlines?country=us&apiKey=72d027b1dc974964b9af07784ff0636d')
@@ -222,7 +223,7 @@ Future<List<Article>> fetchArticles(String searchTerm) async {
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
-    throw Exception('Failed to load album');
+    throw Exception('Failed to load articles');
   }
 }
 
