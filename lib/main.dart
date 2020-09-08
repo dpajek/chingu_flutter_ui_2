@@ -134,7 +134,6 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 _buildArticlesTitleRow(context),
 
                 //_buildFutureList(futureArticles),
@@ -145,7 +144,6 @@ class _MyHomePageState extends State<MyHomePage> {
             //_buildArticleOfTheDayTitleRow(context),
 
             //_buildFutureArticleOfTheDay(futureArticles),
-
           ],
         ),
       ),
@@ -154,32 +152,31 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 Widget _buildArticlesTitleRow(context) => Container(
-                  constraints:
-                      BoxConstraints(maxWidth: 600), //max width on card titles
-                  padding: EdgeInsets.fromLTRB(10, 20, 10,
-                      0), //changed to top=20 after making scrollable
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Articles',
-                        //textAlign: TextAlign.left,
-                      ),
-                      FlatButton(
-                        //color: Colors.blue,
-                        textColor: Theme.of(context).buttonColor,
-                        disabledColor: Colors.grey,
-                        disabledTextColor: Colors.black,
-                        padding: EdgeInsets.all(0),
-                        splashColor: Colors.blueAccent,
-                        onPressed: /*_pushAllArticles*/ () {},
-                        child: Text(
-                          "All Articles",
-                        ),
-                      )
-                    ],
-                  ),
-                );
+      constraints: BoxConstraints(maxWidth: 600), //max width on card titles
+      padding: EdgeInsets.fromLTRB(
+          10, 20, 10, 0), //changed to top=20 after making scrollable
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Articles',
+            //textAlign: TextAlign.left,
+          ),
+          FlatButton(
+            //color: Colors.blue,
+            textColor: Theme.of(context).buttonColor,
+            disabledColor: Colors.grey,
+            disabledTextColor: Colors.black,
+            padding: EdgeInsets.all(0),
+            splashColor: Colors.blueAccent,
+            onPressed: /*_pushAllArticles*/ () {},
+            child: Text(
+              "All Articles",
+            ),
+          )
+        ],
+      ),
+    );
 
 Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
     FutureBuilder<List<Article>>(
