@@ -177,6 +177,7 @@ Widget _buildArticlesTitleRow(context) => Container(
         ],
       ),
     );
+    
 
 Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
     FutureBuilder<List<Article>>(
