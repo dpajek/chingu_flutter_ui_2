@@ -184,14 +184,32 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
       builder: (context, snapshot) {
         if (snapshot.hasData &&
             (snapshot.connectionState == ConnectionState.done)) {
-          List<Article> arts = snapshot.data;
+          List<Article> articles = snapshot.data;
           
           Random random = new Random();
-          var randomIndex = random.nextInt(arts.length);
+          var randomIndex = random.nextInt(articles.length);
 
           print('Random number: $randomIndex');
 
-          return SizedBox(
+          return _buildArticleOfDayCard(articles[randomIndex]);
+          
+        } else if (snapshot.hasError) {
+          return Text("${snapshot.error}");
+        }
+
+        // By default, show a loading spinner.
+        return Center(
+          child: SizedBox(
+            width: 30,
+            height: 30,
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+    );
+    
+
+Widget _buildArticleOfDayCard(Article article) => SizedBox(
             height: 160,
             //width: 150,
             child: InkWell(
@@ -221,10 +239,10 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
-                      child: arts[2].urlToImage == null
+                      child: article.urlToImage == null
                           ? Icon(Icons.error_outline, size: 75)
                           : Image(
-                              image: NetworkImage(arts[randomIndex].urlToImage),
+                              image: NetworkImage(article.urlToImage),
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                               width: double.infinity,
@@ -239,11 +257,11 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
                         //crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            arts[randomIndex].title == null
+                            article.title == null
                           ? 'no title'
-                          : (arts[randomIndex].title.length > 25
-                              ? (arts[randomIndex].title.substring(0, 25) + '...')
-                              : arts[randomIndex].title),
+                          : (article.title.length > 25
+                              ? (article.title.substring(0, 25) + '...')
+                              : article.title),
                             style:
                                 TextStyle(fontSize: 13.0, color: Colors.white),
                             textAlign: TextAlign.left,
@@ -284,20 +302,6 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
               ),
             ),
           );
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-
-        // By default, show a loading spinner.
-        return Center(
-          child: SizedBox(
-            width: 30,
-            height: 30,
-            child: CircularProgressIndicator(),
-          ),
-        );
-      },
-    );
 
 Widget _buildBackBox(double boxPadding, double boxHeight, Color boxColour) =>
     Container(
