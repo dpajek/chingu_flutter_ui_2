@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // used for http requests
 import 'dart:convert'; // provides the json converter
+import 'dart:math';
 
 void main() {
   runApp(MyApp());
@@ -141,15 +142,177 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
 
-            //_buildArticleOfTheDayTitleRow(context),
-
-            //_buildFutureArticleOfTheDay(futureArticles),
+            // Article of Day
+            Container(
+              constraints: BoxConstraints(
+                  maxWidth:
+                      400), // more responsive -- don't let expand too far on wider screens
+              padding: EdgeInsets.fromLTRB(
+                  10, 20, 10, 0), // changed to top=20 after making scrollable
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    'Article of the Day',
+                  ),
+                  _buildArticleOfDay(futureArticles),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+Widget _buildArticleOfDay(Future<List<Article>> futureArticles) => Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        _buildBackBox(10, 170, Colors.blueGrey[100]),
+        _buildBackBox(5, 165, Colors.blueGrey[200]),
+
+        // Main Article of Day Card
+        _buildFutureArticleOfDay(futureArticles),
+      ],
+    );
+
+Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
+    FutureBuilder<List<Article>>(
+      future: futureArticles,
+      builder: (context, snapshot) {
+        if (snapshot.hasData &&
+            (snapshot.connectionState == ConnectionState.done)) {
+          List<Article> arts = snapshot.data;
+          
+          Random random = new Random();
+          var randomIndex = random.nextInt(arts.length);
+
+          print('Random number: $randomIndex');
+
+          return SizedBox(
+            height: 160,
+            //width: 150,
+            child: InkWell(
+              onTap: () {
+                /*
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (BuildContext context) {
+                                      return Scaffold(
+                                        appBar: AppBar(
+                                          title: Text(arts[2].title),
+                                        ),
+                                        body: _buildDetailsPage(arts[2]),
+                                      );
+                                    },
+                                  ),
+                                );
+                                */
+              },
+              child: Card(
+                // This ensures that the Card's children (including the ink splash) are clipped correctly.
+                clipBehavior: Clip.antiAlias,
+                //color: Colors.blueGrey,
+                //shape: null,
+
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: arts[2].urlToImage == null
+                          ? Icon(Icons.error_outline, size: 75)
+                          : Image(
+                              image: NetworkImage(arts[randomIndex].urlToImage),
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                              width: double.infinity,
+                            ),
+                    ),
+                    Container(
+                      //color: Colors.blueGrey,
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            arts[randomIndex].title == null
+                          ? 'no title'
+                          : (arts[randomIndex].title.length > 25
+                              ? (arts[randomIndex].title.substring(0, 25) + '...')
+                              : arts[randomIndex].title),
+                            style:
+                                TextStyle(fontSize: 13.0, color: Colors.white),
+                            textAlign: TextAlign.left,
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                child: Icon(
+                                  Icons.favorite,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                child: Icon(
+                                  Icons.bookmark,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                child: Icon(
+                                  Icons.reply,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return Text("${snapshot.error}");
+        }
+
+        // By default, show a loading spinner.
+        return Center(
+          child: SizedBox(
+            width: 30,
+            height: 30,
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+    );
+
+Widget _buildBackBox(double boxPadding, double boxHeight, Color boxColour) =>
+    Container(
+      padding: EdgeInsets.fromLTRB(boxPadding, 0, boxPadding, 0),
+      child: SizedBox(
+        height: boxHeight,
+        //width: 150,
+        child: Card(
+          // This ensures that the Card's children (including the ink splash) are clipped correctly.
+          clipBehavior: Clip.antiAlias,
+          color: boxColour,
+          child: Container(),
+        ),
+      ),
+    );
 
 Widget _buildArticlesTitleRow(context) => Container(
       constraints: BoxConstraints(maxWidth: 600), //max width on card titles
@@ -177,7 +340,6 @@ Widget _buildArticlesTitleRow(context) => Container(
         ],
       ),
     );
-    
 
 Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
     FutureBuilder<List<Article>>(
