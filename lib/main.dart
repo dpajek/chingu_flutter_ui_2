@@ -191,7 +191,7 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
 
           print('Random number: $randomIndex');
 
-          return _buildArticleOfDayCard(articles[randomIndex]);
+          return _buildArticleOfDayCard(articles[randomIndex], context);
           
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
@@ -209,25 +209,25 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
     );
     
 
-Widget _buildArticleOfDayCard(Article article) => SizedBox(
+Widget _buildArticleOfDayCard(Article article, context) => SizedBox(
             height: 160,
             //width: 150,
             child: InkWell(
               onTap: () {
-                /*
+                
                                 Navigator.of(context).push(
                                   MaterialPageRoute<void>(
                                     builder: (BuildContext context) {
                                       return Scaffold(
                                         appBar: AppBar(
-                                          title: Text(arts[2].title),
+                                          title: Text(article.title),
                                         ),
-                                        body: _buildDetailsPage(arts[2]),
+                                        body: _buildDetailsPage(article),
                                       );
                                     },
                                   ),
                                 );
-                                */
+                                
               },
               child: Card(
                 // This ensures that the Card's children (including the ink splash) are clipped correctly.
@@ -361,7 +361,7 @@ Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
                 itemBuilder: (context, index) {
                   Article art = arts[index];
 
-                  return _buildArticleCard(art);
+                  return _buildArticleCard(art, context);
                 }),
           );
         } else if (snapshot.hasError) {
@@ -380,14 +380,14 @@ Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
     );
 
 // Card Widget
-Widget _buildArticleCard(Article art) => Container(
+Widget _buildArticleCard(Article art, context) => Container(
       //Expanded(
       //child: SizedBox(
       //height: 180,
       width: 160,
       child: InkWell(
         onTap: () {
-          /*
+          
             Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (BuildContext context) {
@@ -400,7 +400,7 @@ Widget _buildArticleCard(Article art) => Container(
                 },
               ),
             );
-            */
+            
         },
         child: Card(
           // This ensures that the Card's children (including the ink splash) are clipped correctly.
@@ -452,6 +452,41 @@ Widget _buildArticleCard(Article art) => Container(
             ],
           ),
         ),
+      ),
+    );
+
+    Widget _buildDetailsPage(Article article) => SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Stack(
+            alignment: const Alignment(-1, 0.8),
+            children: [
+              SizedBox(
+                height: 300,
+                //width: 150,
+                child: Image(
+                  image: NetworkImage(article.urlToImage),
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  //height: 100,
+                  width: 1000,
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
+                //alignment: Alignment.bottomLeft,
+                color: Colors.grey[200].withOpacity(0.7),
+
+                child: Text(
+                  article.author,
+                  textAlign: TextAlign.left,
+                ),
+              ),
+            ],
+          ),
+          Text(article.content),
+        ],
       ),
     );
 
