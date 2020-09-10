@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildArticlesTitleRow(context),
+                _buildArticlesTitleRow(context, futureArticles),
 
                 //_buildFutureList(futureArticles),
                 _buildFutureCards(futureArticles),
@@ -185,14 +185,13 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
         if (snapshot.hasData &&
             (snapshot.connectionState == ConnectionState.done)) {
           List<Article> articles = snapshot.data;
-          
+
           Random random = new Random();
           var randomIndex = random.nextInt(articles.length);
 
           print('Random number: $randomIndex');
 
           return _buildArticleOfDayCard(articles[randomIndex], context);
-          
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
         }
@@ -207,101 +206,101 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
         );
       },
     );
-    
 
 Widget _buildArticleOfDayCard(Article article, context) => SizedBox(
-            height: 160,
-            //width: 150,
-            child: InkWell(
-              onTap: () {
-                
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (BuildContext context) {
-                                      return Scaffold(
-                                        appBar: AppBar(
-                                          title: Text(article.title),
-                                        ),
-                                        body: _buildDetailsPage(article),
-                                      );
-                                    },
-                                  ),
-                                );
-                                
+      height: 160,
+      //width: 150,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  appBar: AppBar( 
+                    title: Text(article.title == null
+                          ? 'no title'
+                          : (article.title.length > 25
+                              ? (article.title.substring(0, 25) + '...')
+                              : article.title),),
+                  ),
+                  body: _buildDetailsPage(article),
+                );
               },
-              child: Card(
-                // This ensures that the Card's children (including the ink splash) are clipped correctly.
-                clipBehavior: Clip.antiAlias,
-                //color: Colors.blueGrey,
-                //shape: null,
+            ),
+          );
+        },
+        child: Card(
+          // This ensures that the Card's children (including the ink splash) are clipped correctly.
+          clipBehavior: Clip.antiAlias,
+          //color: Colors.blueGrey,
+          //shape: null,
 
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: article.urlToImage == null
+                    ? Icon(Icons.error_outline, size: 75)
+                    : Image(
+                        image: NetworkImage(article.urlToImage),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        width: double.infinity,
+                      ),
+              ),
+              Container(
+                //color: Colors.blueGrey,
+                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: article.urlToImage == null
-                          ? Icon(Icons.error_outline, size: 75)
-                          : Image(
-                              image: NetworkImage(article.urlToImage),
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
-                              width: double.infinity,
-                            ),
-                    ),
-                    Container(
-                      //color: Colors.blueGrey,
-                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                      alignment: Alignment.centerLeft,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        //crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            article.title == null
+                    Text(
+                      article.title == null
                           ? 'no title'
                           : (article.title.length > 25
                               ? (article.title.substring(0, 25) + '...')
                               : article.title),
-                            style:
-                                TextStyle(fontSize: 13.0, color: Colors.white),
-                            textAlign: TextAlign.left,
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                child: Icon(
-                                  Icons.favorite,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                child: Icon(
-                                  Icons.bookmark,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                child: Icon(
-                                  Icons.reply,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
+                      style: TextStyle(fontSize: 13.0, color: Colors.white),
+                      textAlign: TextAlign.left,
                     ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          child: Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          child: Icon(
+                            Icons.bookmark,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          child: Icon(
+                            Icons.reply,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
-            ),
-          );
+            ],
+          ),
+        ),
+      ),
+    );
 
 Widget _buildBackBox(double boxPadding, double boxHeight, Color boxColour) =>
     Container(
@@ -318,7 +317,8 @@ Widget _buildBackBox(double boxPadding, double boxHeight, Color boxColour) =>
       ),
     );
 
-Widget _buildArticlesTitleRow(context) => Container(
+Widget _buildArticlesTitleRow(context, Future<List<Article>> futureArticles) =>
+    Container(
       constraints: BoxConstraints(maxWidth: 600), //max width on card titles
       padding: EdgeInsets.fromLTRB(
           10, 20, 10, 0), //changed to top=20 after making scrollable
@@ -336,7 +336,9 @@ Widget _buildArticlesTitleRow(context) => Container(
             disabledTextColor: Colors.black,
             padding: EdgeInsets.all(0),
             splashColor: Colors.blueAccent,
-            onPressed: /*_pushAllArticles*/ () {},
+            onPressed: () {
+              _pushAllArticles(context, futureArticles);
+            },
             child: Text(
               "All Articles",
             ),
@@ -344,6 +346,92 @@ Widget _buildArticlesTitleRow(context) => Container(
         ],
       ),
     );
+
+void _pushAllArticles(context, Future<List<Article>> futureArticles) {
+  Navigator.of(context).push(MaterialPageRoute<void>(
+    builder: (BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("All Articles"),
+        ),
+        body: FutureBuilder(
+          future: futureArticles,
+          builder: (context, snapshot) {
+            if (snapshot.hasData &&
+                (snapshot.connectionState == ConnectionState.done)) {
+              List<Article> articles = snapshot.data;
+
+              return _buildAllArticlesPage(articles);
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+
+            // By default, show a loading spinner.
+            return Center(
+              child: SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(),
+              ),
+            );
+          },
+        ),
+      );
+    },
+  ));
+}
+
+Widget _buildAllArticlesPage(List<Article> articles) {
+  return ListView.builder(
+      padding: EdgeInsets.all(10.0),
+      itemCount: articles.length,
+      itemBuilder: (context, i) {
+        //if (i.isOdd) return Divider(); /*2*/
+
+        //final index = i ~/ 2; /*3*/
+        return _buildRow(articles[i], context);
+      });
+}
+
+Widget _buildRow(Article article, context) {
+  return Container(
+    height: 60,
+    child: ListTile(
+      title: Text(
+        article.title == null ? 'no title' : article.title,
+        //style: _biggerFont,
+      ),
+      leading: article.urlToImage == null
+          ? CircleAvatar(
+              backgroundColor: Colors.grey,
+            )
+          : CircleAvatar(
+              backgroundImage: NetworkImage(article.urlToImage),
+              radius: 20,
+            ),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text(
+                    article.title == null
+                        ? 'no title'
+                        : (article.title.length > 25
+                            ? (article.title.substring(0, 25) + '...')
+                            : article.title),
+                  ),
+                ),
+                body: _buildDetailsPage(article),
+              );
+            },
+          ),
+        );
+      },
+    ),
+  );
+}
 
 Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
     FutureBuilder<List<Article>>(
@@ -387,20 +475,22 @@ Widget _buildArticleCard(Article art, context) => Container(
       width: 160,
       child: InkWell(
         onTap: () {
-          
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return Scaffold(
-                    appBar: AppBar(
-                      title: Text(art.title),
-                    ),
-                    body: _buildDetailsPage(art),
-                  );
-                },
-              ),
-            );
-            
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: Text(art.title == null
+                          ? 'no title'
+                          : (art.title.length > 25
+                              ? (art.title.substring(0, 25) + '...')
+                              : art.title),),
+                  ),
+                  body: _buildDetailsPage(art),
+                );
+              },
+            ),
+          );
         },
         child: Card(
           // This ensures that the Card's children (including the ink splash) are clipped correctly.
@@ -455,7 +545,7 @@ Widget _buildArticleCard(Article art, context) => Container(
       ),
     );
 
-    Widget _buildDetailsPage(Article article) => SingleChildScrollView(
+Widget _buildDetailsPage(Article article) => SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -465,13 +555,14 @@ Widget _buildArticleCard(Article art, context) => Container(
               SizedBox(
                 height: 300,
                 //width: 150,
-                child: Image(
-                  image: NetworkImage(article.urlToImage),
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                  //height: 100,
-                  width: 1000,
-                ),
+                child: article.urlToImage == null
+                    ? Icon(Icons.error_outline, size: 75)
+                    : Image(
+                        image: NetworkImage(article.urlToImage),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        width: double.infinity,
+                      ),
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
@@ -479,13 +570,32 @@ Widget _buildArticleCard(Article art, context) => Container(
                 color: Colors.grey[200].withOpacity(0.7),
 
                 child: Text(
-                  article.author,
+                  article.author == null
+                      ? 'no author'
+                      : (article.author.length > 40
+                          ? article.author.substring(0, 40)
+                          : article.author),
                   textAlign: TextAlign.left,
                 ),
               ),
             ],
           ),
-          Text(article.content),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: EdgeInsets.fromLTRB(20, 25, 20, 0),
+                child: Text(
+                  article.content,
+                  style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -581,14 +691,16 @@ class Article {
   final String author;
   final String content;
   final String urlToImage;
+  final String url;
 
-  Article({this.title, this.author, this.content, this.urlToImage});
+  Article({this.title, this.author, this.content, this.urlToImage, this.url});
 
   factory Article.fromJson(Map<String, dynamic> json) {
     return Article(
         title: json['title'],
         author: json['author'],
         content: json['content'],
-        urlToImage: json['urlToImage']);
+        urlToImage: json['urlToImage'],
+        url: json['url']);
   }
 }
