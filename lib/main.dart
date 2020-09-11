@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http; // used for http requests
 import 'dart:convert'; // provides the json converter
 import 'dart:math';
+import 'dart:io' show Platform;
 
 void main() {
   runApp(MyApp());
@@ -61,6 +63,17 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+Widget _platformAppBar(Widget title)
+  {return Platform.isIOS
+          ? CupertinoNavigationBar(
+              middle: title,
+            )
+          : AppBar(
+              title: title,
+            );
+  }
+
+
 class _MyHomePageState extends State<MyHomePage> {
   Future<List<Article>> futureArticles;
 
@@ -69,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     futureArticles = fetchArticles('');
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -79,88 +93,96 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      appBar: _platformAppBar(Text(widget.title)),
       body: Container(
         padding: EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            // Search bar
-            Container(
-              constraints: BoxConstraints(maxWidth: 400), //max width on search
-              padding: EdgeInsets.fromLTRB(10, 0, 20, 0),
-              height: 30,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                    child: Icon(
-                      Icons.search,
-                      color: Colors.black,
-                      size: 30,
-                    ),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        //enabledBorder: UnderlineInputBorder(),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Theme.of(context).focusColor),
-                        ),
-                        hintText: 'Search',
-                        //contentPadding: const EdgeInsets.symmetric(vertical: 0),
+        child: SingleChildScrollView(
+                  child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              // Search bar
+              Container(
+                constraints: BoxConstraints(maxWidth: 400), //max width on search
+                padding: EdgeInsets.fromLTRB(10, 0, 20, 0),
+                height: 30,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.black,
+                        size: 30,
                       ),
-                      onSubmitted: (searchTerm) {
-                        futureArticles = fetchArticles(searchTerm);
-                        //print('Here is a new term: $searchTerm');
-                        setState(() {
-                          futureArticles = fetchArticles(searchTerm);
-                        });
-                      },
                     ),
-                  ),
-                ],
-              ),
-            ), // Search bar end
+                    Expanded(
+                      child: Platform.isIOS? CupertinoTextField(
+                        onSubmitted: (searchTerm) {
+                          futureArticles = fetchArticles(searchTerm);
+                          //print('Here is a new term: $searchTerm');
+                          setState(() {
+                            futureArticles = fetchArticles(searchTerm);
+                          });
+                        },
+                      ) 
+                      :
+                      TextField(
+                        decoration: InputDecoration(
+                          //enabledBorder: UnderlineInputBorder(),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Theme.of(context).focusColor),
+                          ),
+                          hintText: 'Search',
+                          //contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        ),
+                        onSubmitted: (searchTerm) {
+                          futureArticles = fetchArticles(searchTerm);
+                          //print('Here is a new term: $searchTerm');
+                          setState(() {
+                            futureArticles = fetchArticles(searchTerm);
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ), // Search bar end
 
-            // Article Cards Row
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildArticlesTitleRow(context, futureArticles),
-
-                //_buildFutureList(futureArticles),
-                _buildFutureCards(futureArticles),
-              ],
-            ),
-
-            // Article of Day
-            Container(
-              constraints: BoxConstraints(
-                  maxWidth:
-                      400), // more responsive -- don't let expand too far on wider screens
-              padding: EdgeInsets.fromLTRB(
-                  10, 20, 10, 0), // changed to top=20 after making scrollable
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              // Article Cards Row
+              Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Article of the Day',
-                  ),
-                  _buildArticleOfDay(futureArticles),
+                  _buildArticlesTitleRow(context, futureArticles),
+
+                  //_buildFutureList(futureArticles),
+                  _buildFutureCards(futureArticles),
                 ],
               ),
-            ),
-          ],
+
+              // Article of Day
+              Container(
+                constraints: BoxConstraints(
+                    maxWidth:
+                        400), // more responsive -- don't let expand too far on wider screens
+                padding: EdgeInsets.fromLTRB(
+                    10, 20, 10, 0), // changed to top=20 after making scrollable
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                      'Article of the Day',
+                    ),
+                    _buildArticleOfDay(futureArticles),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -201,7 +223,7 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
           child: SizedBox(
             width: 30,
             height: 30,
-            child: CircularProgressIndicator(),
+            child: Platform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
           ),
         );
       },
@@ -212,16 +234,18 @@ Widget _buildArticleOfDayCard(Article article, context) => SizedBox(
       //width: 150,
       child: InkWell(
         onTap: () {
+          //onPressed: () { // if CupertinoButton is used
           Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (BuildContext context) {
                 return Scaffold(
-                  appBar: AppBar( 
-                    title: Text(article.title == null
+                  appBar: _platformAppBar(Text(
+                      article.title == null
                           ? 'no title'
                           : (article.title.length > 25
                               ? (article.title.substring(0, 25) + '...')
-                              : article.title),),
+                              : article.title),
+                    ),
                   ),
                   body: _buildDetailsPage(article),
                 );
@@ -351,8 +375,7 @@ void _pushAllArticles(context, Future<List<Article>> futureArticles) {
   Navigator.of(context).push(MaterialPageRoute<void>(
     builder: (BuildContext context) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text("All Articles"),
+        appBar: _platformAppBar(Text("All Articles"),
         ),
         body: FutureBuilder(
           future: futureArticles,
@@ -371,7 +394,7 @@ void _pushAllArticles(context, Future<List<Article>> futureArticles) {
               child: SizedBox(
                 width: 30,
                 height: 30,
-                child: CircularProgressIndicator(),
+                child: Platform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
               ),
             );
           },
@@ -414,8 +437,7 @@ Widget _buildRow(Article article, context) {
           MaterialPageRoute<void>(
             builder: (BuildContext context) {
               return Scaffold(
-                appBar: AppBar(
-                  title: Text(
+                appBar: _platformAppBar(Text(
                     article.title == null
                         ? 'no title'
                         : (article.title.length > 25
@@ -461,7 +483,7 @@ Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
           child: SizedBox(
             width: 30,
             height: 30,
-            child: CircularProgressIndicator(),
+            child: Platform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
           ),
         );
       },
@@ -479,12 +501,13 @@ Widget _buildArticleCard(Article art, context) => Container(
             MaterialPageRoute<void>(
               builder: (BuildContext context) {
                 return Scaffold(
-                  appBar: AppBar(
-                    title: Text(art.title == null
+                  appBar: _platformAppBar(Text(
+                      art.title == null
                           ? 'no title'
                           : (art.title.length > 25
                               ? (art.title.substring(0, 25) + '...')
-                              : art.title),),
+                              : art.title),
+                    ),
                   ),
                   body: _buildDetailsPage(art),
                 );
@@ -586,7 +609,7 @@ Widget _buildDetailsPage(Article article) => SingleChildScrollView(
               Container(
                 padding: EdgeInsets.fromLTRB(20, 25, 20, 0),
                 child: Text(
-                  article.content,
+                  article.content==null?'no content':article.content,
                   style: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.normal,
