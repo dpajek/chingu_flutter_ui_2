@@ -3,7 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http; // used for http requests
 import 'dart:convert'; // provides the json converter
 import 'dart:math';
-import 'dart:io' show Platform;
+//import 'dart:io' show Platform;
+import 'package:universal_platform/universal_platform.dart' show UniversalPlatform;
 
 void main() {
   runApp(MyApp());
@@ -64,7 +65,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 Widget _platformAppBar(Widget title)
-  {return Platform.isIOS
+  {return UniversalPlatform.isIOS
           ? CupertinoNavigationBar(
               middle: title,
             )
@@ -118,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     Expanded(
-                      child: Platform.isIOS? CupertinoTextField(
+                      child: UniversalPlatform.isIOS? CupertinoTextField(
                         onSubmitted: (searchTerm) {
                           futureArticles = fetchArticles(searchTerm);
                           //print('Here is a new term: $searchTerm');
@@ -223,7 +224,7 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
           child: SizedBox(
             width: 30,
             height: 30,
-            child: Platform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
+            child: UniversalPlatform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
           ),
         );
       },
@@ -394,7 +395,7 @@ void _pushAllArticles(context, Future<List<Article>> futureArticles) {
               child: SizedBox(
                 width: 30,
                 height: 30,
-                child: Platform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
+                child: UniversalPlatform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
               ),
             );
           },
@@ -483,7 +484,7 @@ Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
           child: SizedBox(
             width: 30,
             height: 30,
-            child: Platform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
+            child: UniversalPlatform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
           ),
         );
       },
