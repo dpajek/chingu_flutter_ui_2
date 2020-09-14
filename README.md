@@ -5,7 +5,7 @@ This project demonstrates a news API call that's used to populate a card-based U
 
 News articles were retrieved from [newsapi.org](https://newsapi.org/).
 
-Here is a [live web app version](https://dpajek.github.io/flutter-ui-12/#/), though it doesn't work because the free tier for the API only allows access from localhost :\
+Here is a [live web app version](https://dpajek.github.io/flutter-ui-2/#/), though it doesn't work because the free tier for the API only allows access from localhost :\
 
 ## Screens
 1. A dashboard showing cards for each article:
