@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http; // used for http requests
 import 'dart:convert'; // provides the json converter
 import 'dart:math';
-//import 'dart:io' show Platform;
-import 'package:universal_platform/universal_platform.dart' show UniversalPlatform;
+
+import 'package:chingu_flutter_ui_2/datadefinition.dart';
+import 'package:chingu_flutter_ui_2/detailspage.dart';
+import 'package:chingu_flutter_ui_2/allarticlespage.dart';
+import 'package:chingu_flutter_ui_2/articleoftheday.dart';
+import 'package:chingu_flutter_ui_2/platformwidgets.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,29 +19,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo - Tier 2',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        //cardColor: Colors.blueGrey,
+      theme: ThemeData.light().copyWith(
         cardTheme: CardTheme(
           color: Colors.blueGrey,
           shadowColor: Colors.redAccent,
           elevation: 4,
         ),
-
         focusColor: Colors.redAccent,
-
         appBarTheme: AppBarTheme(
           color: Colors.blueGrey,
           shadowColor: Colors.redAccent,
           //elevation: 2
         ),
-
         buttonColor: Colors.red[300],
-
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Dashboard'),
@@ -64,17 +57,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-Widget _platformAppBar(Widget title)
-  {return UniversalPlatform.isIOS
-          ? CupertinoNavigationBar(
-              middle: title,
-            )
-          : AppBar(
-              title: title,
-            );
-  }
-
-
 class _MyHomePageState extends State<MyHomePage> {
   Future<List<Article>> futureArticles;
 
@@ -83,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     futureArticles = fetchArticles('');
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -94,18 +75,19 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: _platformAppBar(Text(widget.title)),
+      appBar: AppBar(title: Text(widget.title)),
       body: Container(
         padding: EdgeInsets.all(10),
         child: SingleChildScrollView(
-                  child: Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               // Search bar
               Container(
-                constraints: BoxConstraints(maxWidth: 400), //max width on search
-                padding: EdgeInsets.fromLTRB(10, 0, 20, 0),
+                constraints:
+                    BoxConstraints(maxWidth: 400), //max width on search
+                padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
                 height: 30,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,17 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     Expanded(
-                      child: UniversalPlatform.isIOS? CupertinoTextField(
-                        onSubmitted: (searchTerm) {
-                          futureArticles = fetchArticles(searchTerm);
-                          //print('Here is a new term: $searchTerm');
-                          setState(() {
-                            futureArticles = fetchArticles(searchTerm);
-                          });
-                        },
-                      ) 
-                      :
-                      TextField(
+                      child: TextField(
                         decoration: InputDecoration(
                           //enabledBorder: UnderlineInputBorder(),
                           focusedBorder: UnderlineInputBorder(
@@ -158,8 +130,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildArticlesTitleRow(context, futureArticles),
-
-                  //_buildFutureList(futureArticles),
                   _buildFutureCards(futureArticles),
                 ],
               ),
@@ -170,15 +140,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     maxWidth:
                         400), // more responsive -- don't let expand too far on wider screens
                 padding: EdgeInsets.fromLTRB(
-                    10, 20, 10, 0), // changed to top=20 after making scrollable
+                    0, 20, 10, 0), // changed to top=20 after making scrollable
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text(
-                      'Article of the Day',
+                    Container(
+                      padding: EdgeInsets.fromLTRB(10, 0, 0, 10),
+                      child: Text(
+                        'Article of the Day',
+                      ),
                     ),
-                    _buildArticleOfDay(futureArticles),
+                    _buildFutureArticleOfDay(futureArticles),
                   ],
                 ),
               ),
@@ -190,17 +162,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-Widget _buildArticleOfDay(Future<List<Article>> futureArticles) => Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        _buildBackBox(10, 170, Colors.blueGrey[100]),
-        _buildBackBox(5, 165, Colors.blueGrey[200]),
-
-        // Main Article of Day Card
-        _buildFutureArticleOfDay(futureArticles),
-      ],
-    );
-
 Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
     FutureBuilder<List<Article>>(
       future: futureArticles,
@@ -209,12 +170,14 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
             (snapshot.connectionState == ConnectionState.done)) {
           List<Article> articles = snapshot.data;
 
+          if (articles.length < 1) return Container();
+
           Random random = new Random();
           var randomIndex = random.nextInt(articles.length);
 
           print('Random number: $randomIndex');
 
-          return _buildArticleOfDayCard(articles[randomIndex], context);
+          return ArticleOfTheDay(article: articles[randomIndex]);
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
         }
@@ -224,122 +187,10 @@ Widget _buildFutureArticleOfDay(Future<List<Article>> futureArticles) =>
           child: SizedBox(
             width: 30,
             height: 30,
-            child: UniversalPlatform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
+            child: ActivityIndicator(),
           ),
         );
       },
-    );
-
-Widget _buildArticleOfDayCard(Article article, context) => SizedBox(
-      height: 160,
-      //width: 150,
-      child: InkWell(
-        onTap: () {
-          //onPressed: () { // if CupertinoButton is used
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) {
-                return Scaffold(
-                  appBar: _platformAppBar(Text(
-                      article.title == null
-                          ? 'no title'
-                          : (article.title.length > 25
-                              ? (article.title.substring(0, 25) + '...')
-                              : article.title),
-                    ),
-                  ),
-                  body: _buildDetailsPage(article),
-                );
-              },
-            ),
-          );
-        },
-        child: Card(
-          // This ensures that the Card's children (including the ink splash) are clipped correctly.
-          clipBehavior: Clip.antiAlias,
-          //color: Colors.blueGrey,
-          //shape: null,
-
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: article.urlToImage == null
-                    ? Icon(Icons.error_outline, size: 75)
-                    : Image(
-                        image: NetworkImage(article.urlToImage),
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
-                        width: double.infinity,
-                      ),
-              ),
-              Container(
-                //color: Colors.blueGrey,
-                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                alignment: Alignment.centerLeft,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      article.title == null
-                          ? 'no title'
-                          : (article.title.length > 25
-                              ? (article.title.substring(0, 25) + '...')
-                              : article.title),
-                      style: TextStyle(fontSize: 13.0, color: Colors.white),
-                      textAlign: TextAlign.left,
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          child: Icon(
-                            Icons.favorite,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          child: Icon(
-                            Icons.bookmark,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          child: Icon(
-                            Icons.reply,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-Widget _buildBackBox(double boxPadding, double boxHeight, Color boxColour) =>
-    Container(
-      padding: EdgeInsets.fromLTRB(boxPadding, 0, boxPadding, 0),
-      child: SizedBox(
-        height: boxHeight,
-        //width: 150,
-        child: Card(
-          // This ensures that the Card's children (including the ink splash) are clipped correctly.
-          clipBehavior: Clip.antiAlias,
-          color: boxColour,
-          child: Container(),
-        ),
-      ),
     );
 
 Widget _buildArticlesTitleRow(context, Future<List<Article>> futureArticles) =>
@@ -375,85 +226,9 @@ Widget _buildArticlesTitleRow(context, Future<List<Article>> futureArticles) =>
 void _pushAllArticles(context, Future<List<Article>> futureArticles) {
   Navigator.of(context).push(MaterialPageRoute<void>(
     builder: (BuildContext context) {
-      return Scaffold(
-        appBar: _platformAppBar(Text("All Articles"),
-        ),
-        body: FutureBuilder(
-          future: futureArticles,
-          builder: (context, snapshot) {
-            if (snapshot.hasData &&
-                (snapshot.connectionState == ConnectionState.done)) {
-              List<Article> articles = snapshot.data;
-
-              return _buildAllArticlesPage(articles);
-            } else if (snapshot.hasError) {
-              return Text("${snapshot.error}");
-            }
-
-            // By default, show a loading spinner.
-            return Center(
-              child: SizedBox(
-                width: 30,
-                height: 30,
-                child: UniversalPlatform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
-              ),
-            );
-          },
-        ),
-      );
+      return AllArticlesPage(futureArticles: futureArticles);
     },
   ));
-}
-
-Widget _buildAllArticlesPage(List<Article> articles) {
-  return ListView.builder(
-      padding: EdgeInsets.all(10.0),
-      itemCount: articles.length,
-      itemBuilder: (context, i) {
-        //if (i.isOdd) return Divider(); /*2*/
-
-        //final index = i ~/ 2; /*3*/
-        return _buildRow(articles[i], context);
-      });
-}
-
-Widget _buildRow(Article article, context) {
-  return Container(
-    height: 60,
-    child: ListTile(
-      title: Text(
-        article.title == null ? 'no title' : article.title,
-        //style: _biggerFont,
-      ),
-      leading: article.urlToImage == null
-          ? CircleAvatar(
-              backgroundColor: Colors.grey,
-            )
-          : CircleAvatar(
-              backgroundImage: NetworkImage(article.urlToImage),
-              radius: 20,
-            ),
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return Scaffold(
-                appBar: _platformAppBar(Text(
-                    article.title == null
-                        ? 'no title'
-                        : (article.title.length > 25
-                            ? (article.title.substring(0, 25) + '...')
-                            : article.title),
-                  ),
-                ),
-                body: _buildDetailsPage(article),
-              );
-            },
-          ),
-        );
-      },
-    ),
-  );
 }
 
 Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
@@ -484,7 +259,7 @@ Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
           child: SizedBox(
             width: 30,
             height: 30,
-            child: UniversalPlatform.isIOS? CupertinoActivityIndicator() : CircularProgressIndicator(),
+            child: ActivityIndicator(),
           ),
         );
       },
@@ -492,9 +267,6 @@ Widget _buildFutureCards(Future<List<Article>> futureArticles) =>
 
 // Card Widget
 Widget _buildArticleCard(Article art, context) => Container(
-      //Expanded(
-      //child: SizedBox(
-      //height: 180,
       width: 160,
       child: InkWell(
         onTap: () {
@@ -502,7 +274,8 @@ Widget _buildArticleCard(Article art, context) => Container(
             MaterialPageRoute<void>(
               builder: (BuildContext context) {
                 return Scaffold(
-                  appBar: _platformAppBar(Text(
+                  appBar: AppBar(
+                    title: Text(
                       art.title == null
                           ? 'no title'
                           : (art.title.length > 25
@@ -510,7 +283,9 @@ Widget _buildArticleCard(Article art, context) => Container(
                               : art.title),
                     ),
                   ),
-                  body: _buildDetailsPage(art),
+                  body: DetailsPage(
+                    article: art,
+                  ),
                 );
               },
             ),
@@ -520,6 +295,8 @@ Widget _buildArticleCard(Article art, context) => Container(
           // This ensures that the Card's children (including the ink splash) are clipped correctly.
           clipBehavior: Clip.antiAlias,
           //color: Colors.blueGrey,
+          //shadowColor: Colors.redAccent,
+          //elevation: 4,
           //shape: null,
 
           child: Column(
@@ -569,111 +346,6 @@ Widget _buildArticleCard(Article art, context) => Container(
       ),
     );
 
-Widget _buildDetailsPage(Article article) => SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Stack(
-            alignment: const Alignment(-1, 0.8),
-            children: [
-              SizedBox(
-                height: 300,
-                //width: 150,
-                child: article.urlToImage == null
-                    ? Icon(Icons.error_outline, size: 75)
-                    : Image(
-                        image: NetworkImage(article.urlToImage),
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
-                        width: double.infinity,
-                      ),
-              ),
-              Container(
-                padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
-                //alignment: Alignment.bottomLeft,
-                color: Colors.grey[200].withOpacity(0.7),
-
-                child: Text(
-                  article.author == null
-                      ? 'no author'
-                      : (article.author.length > 40
-                          ? article.author.substring(0, 40)
-                          : article.author),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(20, 25, 20, 0),
-                child: Text(
-                  article.content==null?'no content':article.content,
-                  style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-// Keep this for future reference
-/*
-Widget _buildFutureList(Future<List<Article>> futureArticles) => Expanded(
-      child: FutureBuilder<List<Article>>(
-        future: futureArticles,
-        builder: (context, snapshot) {
-          if (snapshot.hasData &&
-              (snapshot.connectionState == ConnectionState.done)) {
-            List<Article> arts = snapshot.data;
-
-            return ListView.builder(
-                itemCount: arts.length,
-                itemBuilder: (context, index) {
-                  Article art = arts[index];
-
-                  return Container(
-                    height: 60,
-                    child: ListTile(
-                      leading: art.urlToImage == null
-                          ? CircleAvatar(
-                              backgroundColor: Colors.grey,
-                            )
-                          : CircleAvatar(
-                              backgroundImage: NetworkImage(art.urlToImage),
-                            ),
-                      trailing: Text(art.author == null ? '' : art.author),
-                      title: Text(art.title == null ? '' : art.title),
-                      onTap: () {
-                        //Navigator.push(context, new MaterialPageRoute(builder: (context) => new Home()));
-                      },
-                    ),
-                  );
-                });
-          } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
-          }
-
-          // By default, show a loading spinner.
-          return Center(
-            child: SizedBox(
-              width: 30,
-              height: 30,
-              child: CircularProgressIndicator(),
-            ),
-          );
-        },
-      ),
-    );
-    */
-
 Future<List<Article>> fetchArticles(String searchTerm) async {
   // if no search term, show headlines!
 
@@ -700,31 +372,10 @@ Future<List<Article>> fetchArticles(String searchTerm) async {
       arts.add(Article.fromJson(jResponse['articles'][i]));
     }
 
-    //print(numArticles);
-
     return arts;
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
     throw Exception('Failed to load articles');
-  }
-}
-
-class Article {
-  final String title;
-  final String author;
-  final String content;
-  final String urlToImage;
-  final String url;
-
-  Article({this.title, this.author, this.content, this.urlToImage, this.url});
-
-  factory Article.fromJson(Map<String, dynamic> json) {
-    return Article(
-        title: json['title'],
-        author: json['author'],
-        content: json['content'],
-        urlToImage: json['urlToImage'],
-        url: json['url']);
   }
 }
