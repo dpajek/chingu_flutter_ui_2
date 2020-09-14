@@ -1,4 +1,4 @@
-# chingu_flutter
+# chingu_flutter (tier 2)
 
 This is a submission for Chingu's Tier 2 Flutter project.
 This project demonstrates a news API call that's used to populate a card-based UI built with Flutter. It contains 3 pages.
