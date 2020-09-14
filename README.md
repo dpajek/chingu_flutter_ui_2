@@ -10,17 +10,17 @@ Here is a [live web app version](https://dpajek.github.io/flutter-ui-12/#/), tho
 ## Screens
 1. A dashboard showing cards for each article:
 
-![Screen 1](https://github.com/dpajek/chingu_flutter-ui_1/blob/master/assets/flutter_t1_1.png)
+![Screen 1](https://github.com/dpajek/chingu_flutter_ui_2/raw/master/assets/page1.png)
 
 
 2. Detail page samples for each article:
 
-![Screen 2](https://github.com/dpajek/chingu_flutter-ui_1/blob/master/assets/flutter_t1_2.png)
+![Screen 2](https://github.com/dpajek/chingu_flutter_ui_2/raw/master/assets/page2.png)
 
 
 3. A list view of all articles:
 
-![Screen 3](https://github.com/dpajek/chingu_flutter-ui_1/blob/master/assets/flutter_t1_3.png)
+![Screen 3](https://github.com/dpajek/chingu_flutter_ui_2/raw/master/assets/page3.png)
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
