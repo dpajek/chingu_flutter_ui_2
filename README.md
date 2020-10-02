@@ -7,6 +7,11 @@ News articles were retrieved from [newsapi.org](https://newsapi.org/).
 
 Here is a [live web app version](https://dpajek.github.io/flutter-ui-2/#/), though it doesn't work because the free tier for the API only allows access from localhost :\
 
+## About Chingu
+[Chingu](https://chingu.io/) provides an environment for developers to learn through individual and team projects.
+
+The specs for this project can be found [here](https://solofree.docs.chingu.io/solo/steps#tier-2-news-api).
+
 ## Screens
 1. A dashboard showing cards for each article:
 
@@ -23,7 +28,7 @@ Here is a [live web app version](https://dpajek.github.io/flutter-ui-2/#/), thou
 ![Screen 3](https://github.com/dpajek/chingu_flutter_ui_2/raw/master/assets/page3.png)
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+N/A
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
